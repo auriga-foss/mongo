@@ -1810,6 +1810,7 @@ os_macros = {
     "linux": "defined(__linux__)",
     "android": "defined(__ANDROID__)",
     "emscripten": "defined(__EMSCRIPTEN__)",
+    "kos": "defined(__KOS__)",
 }
 
 
@@ -3727,9 +3728,13 @@ def doConfigure(myenv):
     else:
 
         def CheckLibStdCxx(context):
+            # Note: The __GLIBCXX__ macro is defined in c++config.h, which is
+            # included in the <vector> header file. This means that the SDK
+            # should provide libstdc++. The KOS CE SDK does not have libstdc++.
+            # TODO: enable for KOS when libstdc++ is available.
             test_body = """
             #include <vector>
-            #if !defined(__GLIBCXX__)
+            #if !defined(__GLIBCXX__) || defined (__KOS__)
             #error
             #endif
             """
@@ -4678,6 +4683,9 @@ def doConfigure(myenv):
             sslLibName = "ssleay32"
             cryptoLibName = "libeay32"
             sslLinkDependencies = ["libeay32"]
+
+        if conf.env.TargetOSIs('kos'):
+            sslLinkDependencies = ["crypto", "pthread"]
 
         # Used to import system certificate keychains
         if conf.env.TargetOSIs('darwin'):
