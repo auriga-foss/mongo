@@ -85,6 +85,7 @@ env.Library(
 
 boost_thread_source = dict(
     posix=['libs/thread/src/pthread/once.cpp', 'libs/thread/src/pthread/thread.cpp'],
+    kos=['libs/thread/src/pthread/once.cpp', 'libs/thread/src/pthread/thread.cpp'],
     windows=[
         'libs/thread/src/win32/thread.cpp',
         'libs/thread/src/win32/thread_primitives.cpp',
@@ -98,6 +99,7 @@ boost_thread_source = dict(
 
 boost_thread_defines = dict(
     posix=['BOOST_THREAD_PTHREAD'],
+    kos=['BOOST_THREAD_PTHREAD'],
     windows=['BOOST_THREAD_WIN32'],
 ).get(
     env['TARGET_OS_FAMILY'],
