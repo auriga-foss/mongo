@@ -1502,7 +1502,7 @@ onlyServer = len(COMMAND_LINE_TARGETS) == 0 or (len(COMMAND_LINE_TARGETS) == 1 a
 
 noshell = has_option("noshell")
 
-jsEngine = get_option("js-engine")
+jsEngine = get_option("js-engine") != "none"
 
 serverJs = get_option("server-js") == "on"
 

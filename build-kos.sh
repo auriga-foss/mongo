@@ -19,12 +19,14 @@ CXX=${TARGET_ARCH}-${TARGET_OS}-g++
 # 2) Enable support for HTTP client & Free Monitoring when libcurl is available
 #    in the KOS CE SDK;
 # 3) Enable wiredtiger;
+# 3) Enable mozjs JS engine;
 
 python3 buildscripts/scons.py \
     --link-model=static \
     --enable-http-client=off \
     --enable-free-mon=off \
     --wiredtiger=off \
+    --js-engine=none \
     CC="${SDK_PATH}/toolchain/bin/${CC}" \
     CXX="${SDK_PATH}/toolchain/bin/${CXX}" \
     CCFLAGS="--sysroot=${SYSROOT_PATH}" \

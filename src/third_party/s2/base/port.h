@@ -91,7 +91,9 @@ typedef void (*sig_t)(int);
 #include <sys/int_types.h>
 typedef uint16_t u_int16_t;
 
-#elif defined OS_MACOSX
+#elif defined OS_MACOSX || defined OS_KOS
+// Note: we need the following macro definitions for KOS. That's why we don't use the freeBSD
+// "if-else" branch.
 
 // BIG_ENDIAN
 #include <machine/endian.h>
@@ -129,7 +131,7 @@ typedef uint16_t u_int16_t;
 #define bswap_16(x) BSWAP_16(x)
 #define bswap_32(x) BSWAP_32(x)
 #define bswap_64(x) BSWAP_64(x)
-#elif defined __FreeBSD__
+#elif defined __FreeBSD__ || defined __KOS__
 #include <sys/endian.h>
 #define bswap_16(x) bswap16(x)
 #define bswap_32(x) bswap32(x)

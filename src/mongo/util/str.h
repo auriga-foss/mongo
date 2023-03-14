@@ -42,6 +42,12 @@
 #include <string>
 #include <vector>
 
+#if defined(__KOS__)
+extern "C" {
+#include "strings.h" // strcasecmp
+}
+#endif
+
 #include "mongo/base/string_data.h"
 #include "mongo/bson/util/builder.h"
 #include "mongo/platform/bits.h"

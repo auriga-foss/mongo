@@ -9,6 +9,8 @@
 #  define OS_WINDOWS
 #elif defined __FreeBSD__ || defined __OpenBSD__
 #  define OS_FREEBSD
+#elif defined __KOS__
+#  define OS_KOS
 #endif
 
 #endif  // BASE_DEFINER_H
