@@ -238,7 +238,7 @@
 #include "mongo/util/net/ssl_options.h"
 #endif
 
-#if !defined(_WIN32)
+#if !defined(_WIN32) && !defined(__KOS__)
 #include <sys/file.h>
 #endif
 

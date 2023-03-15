@@ -32,7 +32,7 @@
 
 #include "mongo/util/assert_util.h"
 
-#ifndef _WIN32
+#if !defined(_WIN32) && !defined(__KOS__)
 #include <cxxabi.h>
 #include <sys/file.h>
 #endif

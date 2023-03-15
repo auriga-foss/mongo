@@ -74,7 +74,8 @@
                         || defined(unix)      \
                         || defined(__APPLE__) \
                         || defined(__APPLE)   \
-                        || defined(APPLE))
+                        || defined(APPLE)     \
+                        || defined(__KOS__))
 #  include <unistd.h>
 #endif
 

@@ -49,7 +49,7 @@
 #include "mongo/util/scopeguard.h"
 
 #if defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__) || defined(__sun) || \
-    defined(__OpenBSD__)
+    defined(__OpenBSD__) || defined(__KOS__)
 #define FASTPATH_UNIX 1
 #endif
 

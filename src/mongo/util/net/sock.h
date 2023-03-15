@@ -38,7 +38,7 @@
 #include <sys/types.h>
 #include <sys/un.h>
 
-#ifdef __OpenBSD__
+#if defined(__OpenBSD__) || defined(__KOS__)
 #include <sys/uio.h>
 #endif
 

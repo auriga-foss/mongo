@@ -29,7 +29,9 @@
 
 #pragma once
 
-#ifndef _WIN32
+#if defined(__KOS__)
+#include <poll.h>
+#elif !defined(_WIN32)
 #include <sys/poll.h>
 #endif
 
