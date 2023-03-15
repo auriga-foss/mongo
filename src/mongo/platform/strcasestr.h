@@ -42,6 +42,15 @@ using mongo::pal::strcasestr;
 
 #include <cstring>
 
+// Note: KOS string.h does not have a strcasestr() prototype, but looks like libc does have an
+// implementation of this function.
+// TODO: delete when header file is fixed.
+#if defined (__KOS__)
+extern "C" {
+char *strcasestr(const char *haystack, const char *needle);
+}
+#endif // defined (__KOS__)
+
 namespace mongo {
 using ::strcasestr;
 }

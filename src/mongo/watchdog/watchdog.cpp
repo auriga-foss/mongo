@@ -472,6 +472,10 @@ void checkFile(OperationContext* opCtx, const boost::filesystem::path& file) {
 // Apple does not support O_DIRECT, so instead we use fcntl to enable the F_NOCACHE flag later.
 #if defined(__APPLE__)
     int fd = open(file.generic_string().c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+#elif defined(__KOS__)
+// Note: KOS does not support both O_DIRECT and F_NOCACHE.
+// TODO: find the proper solution.
+    int fd = open(file.generic_string().c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
 #else
     int fd = open(file.generic_string().c_str(), O_RDWR | O_CREAT | O_DIRECT, S_IRUSR | S_IWUSR);
 #endif

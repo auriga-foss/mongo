@@ -213,7 +213,17 @@ void handleOneSignal(const SignalWaitResult& waited, LogRotationState* rotation)
           "Received signal {signal}: {error}",
           "Received signal",
           "signal"_attr = sig,
+    // Note:
+    // 1) KOS CE SDK has not strsignal() function prototype;
+    // 2) KOS CE SDK has an implementation of strsignal(). But the function call causes a segfault.
+    // FIXME: use strsignal() when the function is available in KOS
+#if defined(__KOS__)
+          "error"_attr =
+              "FIXME: KOS: strsignal() is not implemented");
+#else
           "error"_attr = strsignal(sig));
+#endif
+
 #if defined(__linux__)
     const siginfo_t& si = waited.si;
     switch (si.si_code) {
