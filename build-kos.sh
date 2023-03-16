@@ -27,6 +27,7 @@ python3 buildscripts/scons.py \
     --enable-free-mon=off \
     --wiredtiger=off \
     --js-engine=none \
+    --use-system-boost \
     CC="${SDK_PATH}/toolchain/bin/${CC}" \
     CXX="${SDK_PATH}/toolchain/bin/${CXX}" \
     CCFLAGS="--sysroot=${SYSROOT_PATH}" \

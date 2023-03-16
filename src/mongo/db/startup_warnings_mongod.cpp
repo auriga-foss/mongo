@@ -328,7 +328,7 @@ void logMongodStartupWarnings(const StorageGlobalParams& storageParams,
     }
 
 // Solaris does not have RLIMIT_MEMLOCK, these are exposed via getrctl(2) instead
-#ifndef __sun
+#if !defined(__sun) && !defined(__KOS__)
     // Check we can lock at least 16 pages for the SecureAllocator
     const unsigned int minLockedPages = 16;
 

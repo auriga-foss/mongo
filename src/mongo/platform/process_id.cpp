@@ -40,6 +40,10 @@
 #include <sys/types.h>
 #endif
 
+#ifdef __KOS__
+#include <kos/thread.h>
+#endif
+
 #include <iostream>
 #include <limits>
 #include <sstream>
@@ -72,6 +76,10 @@ inline NativeProcessId getCurrentNativeThreadId() {
     uint64_t tid;
     invariant(::pthread_threadid_np(NULL, &tid) == 0);
     return tid;
+}
+#elif defined (__KOS__)
+inline NativeProcessId getCurrentNativeThreadId() {
+    return KosThreadCurrentId();
 }
 #else
 inline NativeProcessId getCurrentNativeThreadId() {
