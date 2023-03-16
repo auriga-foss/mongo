@@ -224,7 +224,15 @@ void printStackTraceNoRecursion() {
 
 // must hold MallocFreeOStreamGuard to call
 void printSignalAndBacktrace(int signalNum) {
+    // Note:
+    // 1) KOS CE SDK has not strsignal() function prototype;
+    // 2) KOS CE SDK has an implementation of strsignal(). But the function call causes a segfault.
+    // TODO: use strsignal() when the function is available in KOS.
+#if defined(__KOS__)
+    mallocFreeOStream << "Got signal: " << signalNum << ".";
+#else
     mallocFreeOStream << "Got signal: " << signalNum << " (" << strsignal(signalNum) << ").";
+#endif
     writeMallocFreeStreamToLog();
     printStackTraceNoRecursion();
 }
@@ -298,8 +306,11 @@ extern "C" void abruptQuitAction(int signalNum, siginfo_t*, void*) {
 };
 
 extern "C" void abruptQuitWithAddrSignal(int signalNum, siginfo_t* siginfo, void* ucontext_erased) {
+    // Note: KOS CE SDK has no ucontext.h and doesn't define ucontext_t type.
+#if !defined(__KOS__)
     // For convenient debugger access.
     [[maybe_unused]] auto ucontext = static_cast<const ucontext_t*>(ucontext_erased);
+#endif
 
     MallocFreeOStreamGuard lk{};
 
@@ -356,7 +367,12 @@ void setupSynchronousSignalHandlers() {
             sa.sa_handler = SIG_IGN;
         } else {
             sa.sa_sigaction = spec.function;
+            // Note: KOS CE SDK has no definition of SA_ONSTACK.
+#if defined(__KOS__)
+            sa.sa_flags = SA_SIGINFO;
+#else
             sa.sa_flags = SA_SIGINFO | SA_ONSTACK;
+#endif
         }
         if (sigaction(spec.signal, &sa, nullptr) != 0) {
             int savedErr = errno;
