@@ -88,7 +88,8 @@
 #	define OP_SYSTEM wnt
 
 
-#elif (defined(linux) || defined(LINUX) || defined(__linux))
+// TODO: consider implementing a separate KOS branch
+#elif (defined(linux) || defined(LINUX) || defined(__linux)) || defined(__KOS__)
 
 #	undef  dos
 #	undef  vms

@@ -132,7 +132,9 @@
     !defined(wnt)
 
 #   include <signal.h>
+#if !defined(__KOS__)
 #   include <sys/signal.h>
+#endif
 #   define DPML_SIGNAL(p)	 raise(SIGFPE)
 
 #else
