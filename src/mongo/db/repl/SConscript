@@ -1428,7 +1428,9 @@ env.Library(
         '$BUILD_DIR/mongo/db/pipeline/process_interface/mongo_process_interface',
         '$BUILD_DIR/mongo/db/serverless/serverless_lock',
         '$BUILD_DIR/mongo/db/session/session_catalog_mongod',
-        '$BUILD_DIR/mongo/db/storage/wiredtiger/storage_wiredtiger_import',
+        ('$BUILD_DIR/mongo/db/storage/wiredtiger/storage_wiredtiger_import'
+            if wiredtiger
+            else ''),
         '$BUILD_DIR/mongo/db/transaction/transaction',
         '$BUILD_DIR/mongo/executor/scoped_task_executor',
         'cloner_utils',
