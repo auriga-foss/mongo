@@ -59,6 +59,15 @@
 
 #if !defined(_WIN32)
 #include <sys/time.h>
+#if defined(__KOS__)
+// Note: The KOS CE SDK version of time.h has the ctime_r() prototype, but libc.a only implements
+// _ctime_r(). Tested this function under KOS and the result is the same as for ctime_r() under
+// linux. There is no prototype for _ctime_r().
+// TODO: remove when libc.a is implemented ctime_r().
+extern "C" {
+char *_ctime_r(const time_t *__restrict clock, char *__restrict buf);
+}
+#endif // defined(__KOS__)
 #endif
 
 #ifdef __sun
@@ -133,6 +142,12 @@ std::string time_t_to_String_short(time_t t) {
     char buf[64];
 #if defined(_WIN32)
     ctime_s(buf, sizeof(buf), &t);
+#elif defined(__KOS__)
+    // Note: The KOS CE SDK version of time.h has the ctime_r() prototype, but libc.a only
+    // implements _ctime_r(). Tested this function under KOS and the result is the same as for
+    // ctime_r() under linux.
+    // TODO: use ctime_r() for KOS when libc.a is fixed.
+    _ctime_r(&t, buf);
 #else
     ctime_r(&t, buf);
 #endif
@@ -232,6 +247,12 @@ DateStringBuffer& DateStringBuffer::ctime(Date_t date) {
     time_t t = date.toTimeT();
 #if defined(_WIN32)
     ctime_s(_data.data(), _data.size(), &t);
+#elif defined(__KOS__)
+    // Note: The KOS CE SDK version of time.h has the ctime_r() prototype, but libc.a only
+    // implements _ctime_r(). Tested this function under KOS and the result is the same as for
+    // ctime_r() under linux.
+    // TODO: use ctime_r() for KOS when libc.a is fixed.
+    _ctime_r(&t, _data.data());
 #else
     ctime_r(&t, _data.data());
 #endif

@@ -2569,6 +2569,10 @@ if env.TargetOSIs('linux'):
     if not env.TargetOSIs('android'):
         env.Append(LIBS=["resolv"])
 
+# TODO: remove when libstc++ is available in KOS
+elif env.TargetOSIs('kos'):
+    env.Append(LIBS=["c"])
+
 elif env.TargetOSIs('solaris'):
     env.Append(LIBS=["socket", "resolv", "lgrp"])
 
