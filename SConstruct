@@ -2572,6 +2572,9 @@ if env.TargetOSIs('linux'):
 # TODO: remove when libstc++ is available in KOS
 elif env.TargetOSIs('kos'):
     env.Append(LIBS=["c"])
+    env.Append(LINKFLAGS=["-Wl,--whole-archive",
+                          "-lvfs_remote",
+                          "-Wl,--no-whole-archive"])
 
 elif env.TargetOSIs('solaris'):
     env.Append(LIBS=["socket", "resolv", "lgrp"])
