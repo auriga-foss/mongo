@@ -9,3 +9,16 @@
 //
 
 #include "asio/impl/src.hpp"
+
+#ifdef __KOS__
+// Note: KOS CE SDK has a sockatmark() prototype but no implementation. This is a hack to make the
+// linking process successful. This hack works in both cases: with or without the --use-system-boost
+// option.
+// FIXME: remove when the function is implemented in KOS.
+#include <stdio.h>
+#include <stdlib.h>
+int sockatmark(int s) {
+    fprintf(stderr, "[ERROR] sockatmark() not implemented!\n");
+    abort();
+}
+#endif
