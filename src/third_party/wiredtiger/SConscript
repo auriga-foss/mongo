@@ -75,6 +75,8 @@ elif env.TargetOSIs('freebsd'):
     env.Append(CPPPATH=["build_freebsd"])
 elif env.TargetOSIs('openbsd'):
     env.Append(CPPPATH=["build_openbsd"])
+elif env.TargetOSIs('kos'):
+    env.Append(CPPPATH=["build_kos"])
 elif env.TargetOSIs('linux'):
     if env.TargetOSIs('android'):
         env.Append(CPPPATH=["build_android"])

@@ -25,7 +25,7 @@ python3 buildscripts/scons.py \
     --link-model=static \
     --enable-http-client=off \
     --enable-free-mon=off \
-    --wiredtiger=off \
+    --wiredtiger=on \
     --js-engine=none \
     --use-system-boost \
     CC="${SDK_PATH}/toolchain/bin/${CC}" \
