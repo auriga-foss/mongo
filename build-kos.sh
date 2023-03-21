@@ -18,7 +18,6 @@ CXX=${TARGET_ARCH}-${TARGET_OS}-g++
 # 1) Switch the build to dynamic linking when supported by the KOS CE SDK;
 # 2) Enable support for HTTP client & Free Monitoring when libcurl is available
 #    in the KOS CE SDK;
-# 3) Enable wiredtiger;
 # 3) Enable mozjs JS engine;
 
 python3 buildscripts/scons.py \
