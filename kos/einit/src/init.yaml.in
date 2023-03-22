@@ -1,0 +1,14 @@
+entities:
+
+- name: mongod.Mongod
+  path: mongod
+  env:
+    VFS_FILESYSTEM_BACKEND: client:@ROOTFS_ENTITY@
+  connections:
+  - target: @ROOTFS_ENTITY@
+    id: @ROOTFS_ENTITY@
+@INIT_Mongod_ENTITY_CONNECTIONS+@
+  args:
+    - --help
+
+@INIT_EXTERNAL_ENTITIES@

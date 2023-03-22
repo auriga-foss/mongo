@@ -1,0 +1,7 @@
+# ignore KOS-related build directory
+build/
+
+# do not ignore (cancel rule from ../.gitignore)
+!mongod/
+!CMakeLists.txt
+
