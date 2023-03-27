@@ -2384,7 +2384,7 @@ if env['_LIBDEPS'] == '$_LIBDEPS_LIBS':
     if not env.TargetOSIs('solaris', 'darwin', 'windows', 'openbsd'):
         env.Tool('thin_archive')
 
-if env.TargetOSIs('linux', 'freebsd', 'openbsd'):
+if env.TargetOSIs('linux', 'freebsd', 'openbsd', 'kos'):
     env['LINK_WHOLE_ARCHIVE_LIB_START'] = '-Wl,--whole-archive'
     env['LINK_WHOLE_ARCHIVE_LIB_END'] = '-Wl,--no-whole-archive'
     env['LINK_AS_NEEDED_LIB_START'] = '-Wl,--as-needed'
@@ -2423,7 +2423,7 @@ def init_no_global_add_flags(target, start_flag, end_flag):
 
     setattr(target[0].attributes, "libdeps_prefix_flags", [start_flag])
     setattr(target[0].attributes, "libdeps_postfix_flags", [end_flag])
-    if env.TargetOSIs('linux', 'freebsd', 'openbsd'):
+    if env.TargetOSIs('linux', 'freebsd', 'openbsd', 'kos'):
         setattr(
             target[0].attributes,
             "libdeps_switch_flags",
