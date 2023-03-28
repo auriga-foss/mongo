@@ -4,9 +4,12 @@ entities:
   path: mongod
   env:
     VFS_FILESYSTEM_BACKEND: client:@ROOTFS_ENTITY@
+    VFS_NETWORK_BACKEND: client:kl.VfsNet
   connections:
   - target: @ROOTFS_ENTITY@
     id: @ROOTFS_ENTITY@
+  - target: kl.VfsNet
+    id: kl.VfsNet
 @INIT_Mongod_ENTITY_CONNECTIONS+@
   args:
     - --help
