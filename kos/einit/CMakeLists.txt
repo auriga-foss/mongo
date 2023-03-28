@@ -8,7 +8,8 @@ project_header_default ("STANDARD_GNU_11:YES" "STRICT_WARNINGS:NO")
 
 # Define an ENTITIES variable with a list of entities.
 set (ENTITIES Mongod
-              ${precompiled_vfsVfsNet})
+              ${precompiled_vfsVfsNet}
+              ${rump_DHCPCD_ENTITY})
 
 set (SECURITY_PSL_FILE "src/security.psl.in")
 
@@ -47,6 +48,24 @@ set_target_properties (${precompiled_vfsVfsNet} PROPERTIES
     - devfs /dev devfs 0
     - -l
     - romfs /etc romfs 0")
+
+# DHCP client
+set (EXTRA_CONNECTIONS "\
+    - target: kl.VfsNet
+      id: kl.VfsNet
+    - target: ${ROOTFS_ENTITY}
+      id: ${ROOTFS_ENTITY}")
+
+set_target_properties (${rump_DHCPCD_ENTITY} PROPERTIES
+    DEPENDS_ON_ENTITY ""
+    EXTRA_CONNECTIONS ${EXTRA_CONNECTIONS}
+    EXTRA_ENV "\
+    VFS_FILESYSTEM_BACKEND: client{fs->net}:${ROOTFS_ENTITY}
+    VFS_NETWORK_BACKEND: client:kl.VfsNet"
+    EXTRA_ARGS "\
+    - '-4'
+    - -f
+    - /etc/dhcpcd.conf")
 
 # Building Kaspersky OS solution image for a hardware platform.
 build_kos_hw_image (kos-image

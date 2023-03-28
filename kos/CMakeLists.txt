@@ -19,6 +19,10 @@ include_directories (${vfs_INCLUDE})
 find_package (precompiled_vfs REQUIRED)
 include_directories (${precompiled_vfs_INCLUDE})
 
+# Attach a package with the dhcpcd entity implementation.
+find_package (rump REQUIRED COMPONENTS DHCPCD_ENTITY)
+include_directories (${rump_INCLUDE})
+
 add_subdirectory (mongod)
 add_subdirectory (einit)
 
