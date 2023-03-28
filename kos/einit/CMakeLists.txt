@@ -49,6 +49,12 @@ set_target_properties (${precompiled_vfsVfsNet} PROPERTIES
     - -l
     - romfs /etc romfs 0")
 
+# add network related files to romfs image
+# FIXME: these files are duplicated in ramdisk.
+list (APPEND FILES ${CMAKE_SOURCE_DIR}/resources/image/etc/hosts)
+list (APPEND FILES ${CMAKE_SOURCE_DIR}/resources/image/etc/services)
+list (APPEND FILES ${CMAKE_SOURCE_DIR}/resources/image/etc/hostname)
+
 # DHCP client
 set (EXTRA_CONNECTIONS "\
     - target: kl.VfsNet
