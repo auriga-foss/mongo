@@ -10,8 +10,8 @@ entities:
     id: @ROOTFS_ENTITY@
   - target: kl.VfsNet
     id: kl.VfsNet
-@INIT_Mongod_ENTITY_CONNECTIONS+@
   args:
-    - --help
+    - --nounixsocket
+@INIT_Mongod_ENTITY_CONNECTIONS+@
 
 @INIT_EXTERNAL_ENTITIES@
