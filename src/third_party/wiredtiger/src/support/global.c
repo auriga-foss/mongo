@@ -52,6 +52,12 @@ __global_calibrate_ticks(void)
     __wt_process.tsc_nsec_ratio = WT_TSC_DEFAULT_RATIO;
     __wt_process.use_epochtime = true;
 
+    // Note: __wt_rdtsc() doesn't work properly with KOS aarch64 kernel.
+    // For details please check __wt_rdtsc() implementation src code.
+    //
+    // For KOS, the epoch time will be used instead of the TSC value.
+    // TODO: delete this WA when the KOS kernel is fixed.
+#if !defined(__KOS__)
 #if defined(__i386) || defined(__amd64) || defined(__aarch64__)
     {
         struct timespec start, stop;
@@ -98,6 +104,7 @@ __global_calibrate_ticks(void)
         }
     }
 #endif
+#endif // __KOS__
 }
 
 /*

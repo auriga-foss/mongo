@@ -15,6 +15,21 @@
 static inline uint64_t
 __wt_rdtsc(void)
 {
+    // Note: KOS aarch64: Attempting to read the CNTVCT_EL0 register using the MSR instruction
+    // throws an exception (causing the program to crash).  Testing reading this register on
+    // different versions of QEMU-aarch64 with the linux kernel was successful. But with KOS kernel
+    // read register failed with the same exception.
+    // It looks like the KOS kernel is not correctly setting up the CPU registers to access the
+    // CNTVCT_EL0 register from the EL0 (Exception Level 0, i.e. Application level). Or does not
+    // have a corresponding handler.
+    //
+    // Registers dump: ESR_EL1=0x6234f801, EC=0x18, CNTKCTL_EL1.EL0VCTEN=0.
+    //
+    // For KOS, the epoch time will be used instead of the TSC value.
+    // TODO: use MRS instruction when the KOS kernel is fixed.
+#if defined(__KOS__)
+    return (0);
+#else
 #if defined(__i386)
     {
         uint64_t x;
@@ -39,6 +54,7 @@ __wt_rdtsc(void)
 #else
     return (0);
 #endif
+#endif // __KOS__
 }
 
 /*
