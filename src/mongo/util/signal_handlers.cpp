@@ -354,10 +354,14 @@ void startSignalProcessingThread(LogFileStatus rotate) {
     sigaddset(&sigset, stackTraceSignal());
 #endif
 
+// Note: pthread_sigmask() is stubbed in KOS.
+// TODO: Disable mongo signal handlers logic for KOS?
+#ifndef __KOS__
     // Mask signals in the current (only) thread. All new threads will inherit this mask.
     invariant(pthread_sigmask(SIG_SETMASK, &sigset, nullptr) == 0);
     // Spawn a thread to capture the signals we just masked off.
     stdx::thread(signalProcessingThread, rotate).detach();
+#endif // __KOS__
 #endif
 }
 
