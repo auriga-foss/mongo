@@ -138,6 +138,11 @@ size_t getSupportedMax() {
     const auto supportedMax = [] {
 #ifdef _WIN32
         return serverGlobalParams.maxConns;
+#elif defined (__KOS__)
+        // Note: getrlimit(RLIMIT_NOFILE, ...) not implemented in KOS. I have no idea what the limit
+        // is. Let it be 10% of OPEN_MAX.
+        // FIXME: use getrlimit() when is implemented in KOS.
+        return (OPEN_MAX / 10);
 #else
         struct rlimit limit;
         verify(getrlimit(RLIMIT_NOFILE, &limit) == 0);
