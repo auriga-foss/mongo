@@ -1,0 +1,4 @@
+This is the directory where mongod will store the database.
+
+TODO: To avoid storing this empty directory in git, consider implementing the
+creation of this directory with scripts.
