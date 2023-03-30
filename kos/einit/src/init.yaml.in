@@ -12,6 +12,8 @@ entities:
     id: kl.VfsNet
   args:
     - --nounixsocket
+    - --bind_ip
+    - 10.0.2.10
 @INIT_Mongod_ENTITY_CONNECTIONS+@
 
 @INIT_EXTERNAL_ENTITIES@

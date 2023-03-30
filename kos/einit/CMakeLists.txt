@@ -82,8 +82,13 @@ build_kos_hw_image (kos-image
                                 ${FILES})
 
 # Building Kaspersky OS solution image for a QEMU platform.
+IF (NOT DEFINED MONGOD_PORT)
+    set (MONGOD_PORT 27017)
+ENDIF()
+
 build_kos_qemu_image (kos-qemu-image
                       EINIT_ENTITY EinitQemu
+                      QEMU_USER_NETWORK_FLAGS "hostfwd=tcp:127.0.0.1:${MONGOD_PORT}-10.0.2.10:27017"
                       CONNECTIONS_CFG "src/init.yaml.in"
                       SECURITY_PSL ${SECURITY_PSL_FILE}
                       IMAGE_FILES ${ENTITIES}

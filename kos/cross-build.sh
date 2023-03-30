@@ -22,6 +22,7 @@ export BUILD_WITH_CLANG=
 export BUILD_WITH_GCC=
 
 TOOLCHAIN_SUFFIX=""
+MONGOD_PORT=27018
 
 if [ "$BUILD_WITH_CLANG" == "y" ];then
     TOOLCHAIN_SUFFIX="-clang"
@@ -36,4 +37,5 @@ fi
       -D CMAKE_INSTALL_PREFIX:STRING="$INSTALL_PREFIX" \
       -D CMAKE_FIND_ROOT_PATH="$([[ -f "$SCRIPT_DIR/additional_cmake_find_root.txt" ]] && cat "$SCRIPT_DIR/additional_cmake_find_root.txt")$PREFIX_DIR/sysroot-$TARGET" \
       -D CMAKE_TOOLCHAIN_FILE="$SDK_PREFIX/toolchain/share/toolchain-$TARGET$TOOLCHAIN_SUFFIX.cmake" \
+      -D MONGOD_PORT=$MONGOD_PORT \
       "$SCRIPT_DIR/" && "$SDK_PREFIX/toolchain/bin/cmake" --build "$BUILD" --target sim
