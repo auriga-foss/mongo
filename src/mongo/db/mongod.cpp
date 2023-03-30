@@ -44,6 +44,18 @@ int wmain(int argc, wchar_t* argvW[]) {
 }
 #else
 int main(int argc, char* argv[]) {
+    // Note: The file 'hostname' exists in ROMFS whose mount point is the /etc directory (VfsNet
+    // entity). So the /etc/hostname path is present in the VFS, but gethostname() returns an empty
+    // string. This causes a lot of error messages in the log such as "cannot get hostname".
+    // The main purpose of this W/A is to clear the log of these messages.
+    // TODO: remove this W/A when gethostname() works correctly.
+#if defined(__KOS__)
+    int ret = sethostname("kos-mongod", 10);
+    if (ret) {
+        fprintf(stderr, "sethostname error: %d (%s)\n", errno, strerror(errno));
+        return -1;
+    }
+#endif
     mongo::quickExit(mongo::mongod_main(argc, argv));
 }
 #endif
