@@ -48,6 +48,11 @@
 #include <unistd.h>
 #endif
 
+// KOS doesn't have WIFSTOPPED defined in sys/wait.h
+#ifdef __KOS__
+#define WIFSTOPPED(x) (_WSTATUS(x) == _WSTOPPED)
+#endif
+
 #if defined(__APPLE__)
 #include <TargetConditionals.h>
 #endif

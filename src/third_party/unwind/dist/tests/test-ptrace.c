@@ -48,6 +48,11 @@ main (void)
 #include <sys/ptrace.h>
 #include <sys/wait.h>
 
+// KOS doesn't have WIFSTOPPED defined in sys/wait.h
+#ifdef __KOS__
+#define WIFSTOPPED(x) (_WSTATUS(x) == _WSTOPPED)
+#endif
+
 extern char **environ;
 
 static const int nerrors_max = 100;

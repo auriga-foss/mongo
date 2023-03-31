@@ -73,6 +73,12 @@
 #include <signal.h>
 #include <sys/wait.h>
 
+// KOS doesn't have WIFSTOPPED defined in sys/wait.h
+#ifdef __KOS__
+#define WIFSTOPPED(x) (_WSTATUS(x) == _WSTOPPED)
+#endif
+
+
 static char home[1024]; /* Program working dir */
 
 static const char *const uri_main = "table:main";

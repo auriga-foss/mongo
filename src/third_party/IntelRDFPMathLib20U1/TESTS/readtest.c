@@ -1611,7 +1611,7 @@ status_compare (char *stat1, char *stat2) {
   }
   if (wp1n != wp2n)
     return 1;
-#ifdef LINUX
+#if defined(LINUX) || defined(__KOS__)
   qsort (wp1, wp1n, sizeof (char *), (__compar_fn_t) st_compare);
   qsort (wp2, wp2n, sizeof (char *), (__compar_fn_t) st_compare);
 #else

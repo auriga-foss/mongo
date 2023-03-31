@@ -59,7 +59,8 @@
 #include "mongo/util/stacktrace.h"
 
 /** `sigaltstack` was introduced in glibc-2.12 in 2010. */
-#if !defined(_WIN32)
+// No `sigaltstack` in KOS
+#if !defined(_WIN32) && !defined(__KOS__)
 #define HAVE_SIGALTSTACK
 #endif
 
