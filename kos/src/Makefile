@@ -108,6 +108,24 @@ qemurun:
 qemurun/fast:
 	$(MAKE) -C $(BUILD) sim/fast
 
+.PHONY: qemurun/gdb qemurun/gdb/fast gdb gdb/fast
+qemurun/gdb:
+	$(MAKE) -C $(BUILD) gdbsim
+
+qemurun/gdb/fast:
+	$(MAKE) -C $(BUILD) gdbsim/fast
+
+# TODO: make QEMU GDB port configurable
+export GDBOPTIONS = \
+	-ex "target remote 127.0.0.1:1234" \
+	--symbols=$(MONGO_BUILD_PATH)/install/bin/mongod.debug
+
+gdb:
+	$(MAKE) -C $(BUILD) gdb
+
+gdb/fast:
+	$(MAKE) -C $(BUILD) gdb/fast
+
 .PHONY: clean clean-kos clean-mongo clean-all
 clean: clean-kos
 clean-kos:
