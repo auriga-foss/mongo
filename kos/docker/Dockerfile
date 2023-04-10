@@ -28,6 +28,7 @@ FROM kos-ce-base AS kos-ce-mongo
 # MongoDB build prerequisites:
 # https://github.com/mongodb/mongo/blob/master/docs/building.md
 RUN apt install -y build-essential \
+                   git \
                    libcurl4-openssl-dev \
                    liblzma-dev \
                    python3 \
