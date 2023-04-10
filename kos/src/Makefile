@@ -51,7 +51,7 @@ MARCH=armv8-a
 # 3) Enable mozjs JS engine;
 .PHONY: compile-mongod
 compile-mongod:
-	python3 $(MONGO_SRC)/buildscripts/scons.py \
+	cd $(MONGO_SRC) && python3 buildscripts/scons.py \
 		--link-model=static \
 		--enable-http-client=off \
 		--enable-free-mon=off \
@@ -66,10 +66,9 @@ compile-mongod:
 		install-mongod -j${NPROC}
 ifeq ($(strip $(DEBUG_ENABLED)),y)
 	@echo "Debug build. Stripping resulting binary..."
-	pushd $(MONGO_BUILD_PATH)/install/bin/
-	mv mongod mongod.debug
-	$(TARGET)-strip -g -o mongod mongod.debug
-	popd
+	cd $(MONGO_BUILD_PATH)/install/bin/ \
+		&& mv mongod mongod.debug \
+		&& $(TARGET)-strip -g -o mongod mongod.debug
 endif
 
 .PHONY: dump-vars
@@ -86,7 +85,7 @@ dump-vars:
 	@echo "\t MONGO_SRC = $(MONGO_SRC)"
 	@echo "\t MONGO_BUILD_PATH = $(MONGO_BUILD_PATH)"
 
-.PHONY: prebuild qemubuild hwbuild
+.PHONY: prebuild qemubuild hwbuild qemurun qemurun/fast
 prebuild:
 	$(SDK_PREFIX)/toolchain/bin/cmake -G "Unix Makefiles" \
 		-B $(BUILD) \
@@ -101,6 +100,12 @@ qemubuild: prebuild
 
 hwbuild: prebuild
 	$(MAKE) -C $(BUILD) kos-image
+
+qemurun:
+	$(MAKE) -C $(BUILD) sim
+
+qemurun/fast:
+	$(MAKE) -C $(BUILD) sim/fast
 
 .PHONY: clean clean-kos clean-mongo clean-all
 clean: clean-kos
