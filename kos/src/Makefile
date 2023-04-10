@@ -93,6 +93,7 @@ prebuild:
 		-D CMAKE_INSTALL_PREFIX:STRING="$(INSTALL_PREFIX)" \
 		-D CMAKE_TOOLCHAIN_FILE="$(SDK_PREFIX)/toolchain/share/toolchain-$(TARGET)$(TOOLCHAIN_SUFFIX).cmake" \
 		-D MONGOD_PORT=$(MONGOD_PORT) \
+		-D MONGOD_BINARY_PATH=$(MONGO_BUILD_PATH)/install/bin/mongod \
 		$(BUILD_ROOT)/
 
 qemubuild: prebuild

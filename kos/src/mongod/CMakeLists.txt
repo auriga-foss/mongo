@@ -11,9 +11,7 @@ nk_build_edl_files (mongod_edl_files
                     EDL "${CMAKE_SOURCE_DIR}/resources/edl/Mongod.edl")
 
 add_executable (Mongod IMPORTED GLOBAL)
-# TODO: fix path
-set_property(TARGET Mongod PROPERTY IMPORTED_LOCATION
-    ${CMAKE_SOURCE_DIR}/../build/install/bin/mongod)
+set_property(TARGET Mongod PROPERTY IMPORTED_LOCATION ${MONGOD_BINARY_PATH})
 
 add_dependencies (Mongod mongod_edl_files)
 target_link_libraries (Mongod)
