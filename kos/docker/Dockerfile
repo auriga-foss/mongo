@@ -67,3 +67,6 @@ RUN python3 -m pip install jsonschema \
 COPY pip ./pip
 RUN python3 -m pip install -r pip/compile-requirements.txt && rm -rf ./pip
 
+# Note: W/A for working with external (mounted with docker -v option) git repos
+RUN git config --global --add safe.directory "*"
+
