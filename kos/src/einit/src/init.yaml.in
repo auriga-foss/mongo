@@ -1,7 +1,7 @@
 entities:
 
 - name: mongod.Mongod
-  path: mongod
+  path: mongod.nodebug
   env:
     VFS_FILESYSTEM_BACKEND: client:@ROOTFS_ENTITY@
     VFS_NETWORK_BACKEND: client:kl.VfsNet

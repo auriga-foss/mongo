@@ -64,12 +64,11 @@ compile-mongod:
 		CCFLAGS="--sysroot=${SYSROOT_PATH} -march=${MARCH} ${DEBUG_CCFLAGS}" \
 		TARGET_OS="${TARGET_OS}" \
 		install-mongod -j${NPROC}
-ifeq ($(strip $(DEBUG_ENABLED)),y)
-	@echo "Debug build. Stripping resulting binary..."
-	cd $(MONGO_BUILD_PATH)/install/bin/ \
-		&& mv mongod mongod.debug \
-		&& $(TARGET)-strip -g -o mongod mongod.debug
-endif
+
+# Note: used even if DEBUG_ENABLED=n to prevent scons from rebuilding the
+# binary due to renaming
+$(MONGO_BUILD_PATH)/install/bin/mongod.nodebug: $(MONGO_BUILD_PATH)/install/bin/mongod
+	$(TARGET)-strip -g -o $@ $<
 
 .PHONY: dump-vars
 dump-vars:
@@ -86,14 +85,14 @@ dump-vars:
 	@echo "\t MONGO_BUILD_PATH = $(MONGO_BUILD_PATH)"
 
 .PHONY: prebuild qemubuild hwbuild qemurun qemurun/fast
-prebuild:
+prebuild: $(MONGO_BUILD_PATH)/install/bin/mongod.nodebug
 	$(SDK_PREFIX)/toolchain/bin/cmake -G "Unix Makefiles" \
 		-B $(BUILD) \
 		-D CMAKE_BUILD_TYPE:STRING=Debug \
 		-D CMAKE_INSTALL_PREFIX:STRING="$(INSTALL_PREFIX)" \
 		-D CMAKE_TOOLCHAIN_FILE="$(SDK_PREFIX)/toolchain/share/toolchain-$(TARGET)$(TOOLCHAIN_SUFFIX).cmake" \
 		-D MONGOD_PORT=$(MONGOD_PORT) \
-		-D MONGOD_BINARY_PATH=$(MONGO_BUILD_PATH)/install/bin/mongod \
+		-D MONGOD_BINARY_PATH=$(MONGO_BUILD_PATH)/install/bin/mongod.nodebug \
 		$(BUILD_ROOT)/
 
 qemubuild: prebuild
