@@ -70,7 +70,34 @@ compile-mongod:
 $(MONGO_BUILD_PATH)/install/bin/mongod.nodebug: $(MONGO_BUILD_PATH)/install/bin/mongod
 	$(TARGET)-strip -g -o $@ $<
 
-.PHONY: dump-vars
+.PHONY: help dump-vars
+
+help:
+	@echo "Targets:"
+	@echo "  The following targets are defined by this Makefile:"
+	@echo "    help:             prints this message;"
+	@echo "    dump-vars:        dump Makefile variables;"
+	@echo "    compile-mongod:   compile and install mongod;"
+	@echo "    prebuild:         generate build files (Makefiles) from"
+	@echo "                      CMakeLists.txt scenario;"
+	@echo "    qemubuild:        build KOS image to run on QEMU;"
+	@echo "    hwbuild:          build KOS image to run on RaspberryPi;"
+	@echo "    qemurun:          rebuild image and run using QEMU;"
+	@echo "    qemurun/fast:     'fast' version of the qemurun target. Does the"
+	@echo "                      same, except it DOESN'T rebuild an image;"
+	@echo "    qemurun/gdb:      rebuild image, run using QEMU. QEMU will be"
+	@echo "                      run with a running GDB server waiting for a"
+	@echo "                      connection on tcp::1234;"
+	@echo "    qemurun/gdb/fast: 'fast' version of the qemurun/gdb target. Does"
+	@echo "                      the same, except it DOESN'T rebuild an image;"
+	@echo "    gdb:              rebuild image and run GDB for target arch;"
+	@echo "    gdb/fast:         'fast' version of the gdb target. Does the"
+	@echo "                      same, except it DOESN'T rebuild an image;"
+	@echo "    clean:            aux. target (currently equal to clean-kos);"
+	@echo "    clean-kos:        remove KOS build directory;"
+	@echo "    clean-mongo:      remove MongoDB build directory;"
+	@echo "    clean-all:        remove KOS & MongoDB build directories;"
+
 dump-vars:
 	@echo "Variables:"
 	@echo "\t BUILD_ROOT = $(BUILD_ROOT)"
