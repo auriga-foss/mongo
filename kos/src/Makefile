@@ -36,6 +36,20 @@ ifeq ($(strip $(DEBUG_ENABLED)),y)
 DEBUG_CCFLAGS += -ggdb -Og
 endif
 
+ifeq ($(strip $(TARGET_ARCH)),aarch64)
+QEMU_OPTS = -m 2048 -machine vexpress-a15,secure=on -cpu cortex-a72 \
+			-nographic -monitor none -smp 4 -serial stdio \
+		    -nic user,hostfwd=tcp:127.0.0.1:$(MONGOD_PORT)-10.0.2.10:27017
+else
+$(error Bad target architecture: $(TARGET_ARCH). \
+        No architectures other than aarch64 are currently supported)
+endif
+
+QEMU_SERIAL_PORT ?= 12345
+QEMU_GDB_PORT ?= 1234
+QEMU_GDB_OPTS = -serial tcp::$(QEMU_SERIAL_PORT),server,nowait \
+				-S -gdb tcp::$(QEMU_GDB_PORT)
+
 NPROC ?= 32
 
 # For aarch64 target architecture, the SConstruct script sets the -march
@@ -73,8 +87,7 @@ $(MONGO_BUILD_PATH)/install/bin/mongod.nodebug: $(MONGO_BUILD_PATH)/install/bin/
 .PHONY: help dump-vars
 
 help:
-	@echo "Targets:"
-	@echo "  The following targets are defined by this Makefile:"
+	@echo "The following targets are defined by this Makefile:"
 	@echo "    help:             prints this message;"
 	@echo "    dump-vars:        dump Makefile variables;"
 	@echo "    compile-mongod:   compile and install mongod;"
@@ -82,36 +95,46 @@ help:
 	@echo "                      CMakeLists.txt scenario;"
 	@echo "    qemubuild:        build KOS image to run on QEMU;"
 	@echo "    hwbuild:          build KOS image to run on RaspberryPi;"
-	@echo "    qemurun:          rebuild image and run using QEMU;"
-	@echo "    qemurun/fast:     'fast' version of the qemurun target. Does the"
-	@echo "                      same, except it DOESN'T rebuild an image;"
-	@echo "    qemurun/gdb:      rebuild image, run using QEMU. QEMU will be"
-	@echo "                      run with a running GDB server waiting for a"
-	@echo "                      connection on tcp::1234;"
-	@echo "    qemurun/gdb/fast: 'fast' version of the qemurun/gdb target. Does"
-	@echo "                      the same, except it DOESN'T rebuild an image;"
-	@echo "    gdb:              rebuild image and run GDB for target arch;"
-	@echo "    gdb/fast:         'fast' version of the gdb target. Does the"
-	@echo "                      same, except it DOESN'T rebuild an image;"
+	@echo "    qemurun:          run using QEMU"
+	@echo "                      (options are specified in QEMU_OPTS variable);"
+	@echo "    qemurun/gdb:      run using QEMU. QEMU will be run with a GDB"
+	@echo "                      server listening on tcp::QEMU_GDB_PORT"
+	@echo "                      (GDB options are specified in QEMU_GDB_OPTS"
+	@echo "                      variable);"
+	@echo "    run/gdb:          run GDB, connect to server, add symbol file;"
 	@echo "    clean:            aux. target (currently equal to clean-kos);"
 	@echo "    clean-kos:        remove KOS build directory;"
 	@echo "    clean-mongo:      remove MongoDB build directory;"
 	@echo "    clean-all:        remove KOS & MongoDB build directories;"
+	@echo ""
+	@echo "The following targets are wrappers for those predefined by the KOS:"
+	@echo "    sim:              rebuild image and run using QEMU;"
+	@echo "    sim/fast:         'fast' version of the sim target. Does the"
+	@echo "                      same, except it DOESN'T rebuild an image;"
+	@echo "    gdbsim:           rebuild image, run using QEMU. QEMU will be"
+	@echo "                      run with a running GDB server waiting for a"
+	@echo "                      connection on tcp::1234;"
+	@echo "    gdbsim/fast:      'fast' version of the gdbsim target. Does the"
+	@echo "                      same, except it DOESN'T rebuild an image;"
+	@echo "    gdb:              rebuild image and run GDB for target arch;"
+	@echo "    gdb/fast:         'fast' version of the gdb target. Does the"
+	@echo "                      same, except it DOESN'T rebuild an image;"
+
 
 dump-vars:
 	@echo "Variables:"
-	@echo "\t BUILD_ROOT = $(BUILD_ROOT)"
-	@echo "\t BUILD = $(BUILD)"
-	@echo "\t SDK_EDITION = $(SDK_EDITION)"
-	@echo "\t SDK_VERSION = $(SDK_VERSION)"
-	@echo "\t SDK_PREFIX = $(SDK_PREFIX)"
-	@echo "\t PATH = $(PATH)"
-	@echo "\t TARGET = $(TARGET)"
-	@echo "\t MONGOD_PORT = $(MONGOD_PORT)"
-	@echo "\t MONGO_SRC = $(MONGO_SRC)"
-	@echo "\t MONGO_BUILD_PATH = $(MONGO_BUILD_PATH)"
+	@echo "    BUILD_ROOT = $(BUILD_ROOT)"
+	@echo "    BUILD = $(BUILD)"
+	@echo "    SDK_EDITION = $(SDK_EDITION)"
+	@echo "    SDK_VERSION = $(SDK_VERSION)"
+	@echo "    SDK_PREFIX = $(SDK_PREFIX)"
+	@echo "    PATH = $(PATH)"
+	@echo "    TARGET = $(TARGET)"
+	@echo "    MONGOD_PORT = $(MONGOD_PORT)"
+	@echo "    MONGO_SRC = $(MONGO_SRC)"
+	@echo "    MONGO_BUILD_PATH = $(MONGO_BUILD_PATH)"
 
-.PHONY: prebuild qemubuild hwbuild qemurun qemurun/fast
+.PHONY: prebuild qemubuild hwbuild
 prebuild: $(MONGO_BUILD_PATH)/install/bin/mongod.nodebug
 	$(SDK_PREFIX)/toolchain/bin/cmake -G "Unix Makefiles" \
 		-B $(BUILD) \
@@ -128,29 +151,24 @@ qemubuild: prebuild
 hwbuild: prebuild
 	$(MAKE) -C $(BUILD) kos-image
 
+.PHONY: qemurun qemurun/gdb run/gdb
 qemurun:
-	$(MAKE) -C $(BUILD) sim
+	qemu-system-$(TARGET_ARCH) $(QEMU_OPTS) \
+		-kernel $(BUILD)/einit/kos-qemu-image
 
-qemurun/fast:
-	$(MAKE) -C $(BUILD) sim/fast
-
-.PHONY: qemurun/gdb qemurun/gdb/fast gdb gdb/fast
 qemurun/gdb:
-	$(MAKE) -C $(BUILD) gdbsim
+	qemu-system-$(TARGET_ARCH) $(QEMU_OPTS) $(QEMU_GDB_OPTS) \
+		-kernel $(BUILD)/einit/kos-qemu-image
 
-qemurun/gdb/fast:
-	$(MAKE) -C $(BUILD) gdbsim/fast
+run/gdb:
+	$(TARGET)-gdb -ex "target remote 127.0.0.1:$(QEMU_GDB_PORT)" \
+		--symbols=$(MONGO_BUILD_PATH)/install/bin/mongod
 
-# TODO: make QEMU GDB port configurable
-export GDBOPTIONS = \
-	-ex "target remote 127.0.0.1:1234" \
-	--symbols=$(MONGO_BUILD_PATH)/install/bin/mongod.debug
-
-gdb:
-	$(MAKE) -C $(BUILD) gdb
-
-gdb/fast:
-	$(MAKE) -C $(BUILD) gdb/fast
+# Note: These targets are wrappers for those predefined by the KOS build system
+WRAPPER_TARGETS = sim sim/fast gdbsim gdbsim/fast gdb gdb/fast
+.PHONY: $(WRAPPER_TARGETS)
+$(WRAPPER_TARGETS): $(BUILD)/Makefile
+	$(MAKE) -C $(<D) $@
 
 .PHONY: clean clean-kos clean-mongo clean-all
 clean: clean-kos
