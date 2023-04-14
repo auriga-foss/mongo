@@ -1,0 +1,41 @@
+From e23a4a64b8112e25b3108603a61267d9e2e0518b Mon Sep 17 00:00:00 2001
+From: Mikhail Zhvakin <mikhail.zhvakin@auriga.com>
+Date: Fri, 14 Apr 2023 16:04:21 +0300
+Subject: [PATCH 2/2] __wt_rdtsc(): Use HalGetCpuTicksRelaxed() to get CPU
+ counter
+
+Signed-off-by: Mikhail Zhvakin <mikhail.zhvakin@auriga.com>
+---
+ src/third_party/wiredtiger/src/include/time_inline.h | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/src/third_party/wiredtiger/src/include/time_inline.h b/src/third_party/wiredtiger/src/include/time_inline.h
+index 611e38eab24..3892d698cc0 100644
+--- a/src/third_party/wiredtiger/src/include/time_inline.h
++++ b/src/third_party/wiredtiger/src/include/time_inline.h
+@@ -12,6 +12,14 @@
+  * __wt_rdtsc --
+  *     Get a timestamp from CPU registers.
+  */
++#if defined(__KOS__)
++#include <hal/cputicks.h>
++static inline uint64_t
++__wt_rdtsc(void)
++{
++    return HalGetCpuTicksRelaxed();
++}
++#else
+ static inline uint64_t
+ __wt_rdtsc(void)
+ {
+@@ -40,6 +48,7 @@ __wt_rdtsc(void)
+     return (0);
+ #endif
+ }
++#endif // defined(__KOS__)
+ 
+ /*
+  * __time_check_monotonic --
+-- 
+2.30.2
+

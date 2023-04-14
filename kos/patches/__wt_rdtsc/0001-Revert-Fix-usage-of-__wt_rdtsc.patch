@@ -1,0 +1,73 @@
+From 155abe457f031fbdc71e5f9df0dbc504b5fb28cc Mon Sep 17 00:00:00 2001
+From: Mikhail Zhvakin <mikhail.zhvakin@auriga.com>
+Date: Fri, 5 May 2023 16:49:06 +0300
+Subject: [PATCH 1/2] Revert "Fix usage of __wt_rdtsc()"
+
+This reverts commit bef232e93d8af3bd21e01ace6aca381cd9230be1.
+---
+ .../wiredtiger/src/include/time_inline.h         | 16 ----------------
+ src/third_party/wiredtiger/src/support/global.c  |  7 -------
+ 2 files changed, 23 deletions(-)
+
+diff --git a/src/third_party/wiredtiger/src/include/time_inline.h b/src/third_party/wiredtiger/src/include/time_inline.h
+index b8c587c7898..611e38eab24 100644
+--- a/src/third_party/wiredtiger/src/include/time_inline.h
++++ b/src/third_party/wiredtiger/src/include/time_inline.h
+@@ -15,21 +15,6 @@
+ static inline uint64_t
+ __wt_rdtsc(void)
+ {
+-    // Note: KOS aarch64: Attempting to read the CNTVCT_EL0 register using the MSR instruction
+-    // throws an exception (causing the program to crash).  Testing reading this register on
+-    // different versions of QEMU-aarch64 with the linux kernel was successful. But with KOS kernel
+-    // read register failed with the same exception.
+-    // It looks like the KOS kernel is not correctly setting up the CPU registers to access the
+-    // CNTVCT_EL0 register from the EL0 (Exception Level 0, i.e. Application level). Or does not
+-    // have a corresponding handler.
+-    //
+-    // Registers dump: ESR_EL1=0x6234f801, EC=0x18, CNTKCTL_EL1.EL0VCTEN=0.
+-    //
+-    // For KOS, the epoch time will be used instead of the TSC value.
+-    // TODO: use MRS instruction when the KOS kernel is fixed.
+-#if defined(__KOS__)
+-    return (0);
+-#else
+ #if defined(__i386)
+     {
+         uint64_t x;
+@@ -54,7 +39,6 @@ __wt_rdtsc(void)
+ #else
+     return (0);
+ #endif
+-#endif // __KOS__
+ }
+ 
+ /*
+diff --git a/src/third_party/wiredtiger/src/support/global.c b/src/third_party/wiredtiger/src/support/global.c
+index 77e5d70a535..f19981eff08 100644
+--- a/src/third_party/wiredtiger/src/support/global.c
++++ b/src/third_party/wiredtiger/src/support/global.c
+@@ -52,12 +52,6 @@ __global_calibrate_ticks(void)
+     __wt_process.tsc_nsec_ratio = WT_TSC_DEFAULT_RATIO;
+     __wt_process.use_epochtime = true;
+ 
+-    // Note: __wt_rdtsc() doesn't work properly with KOS aarch64 kernel.
+-    // For details please check __wt_rdtsc() implementation src code.
+-    //
+-    // For KOS, the epoch time will be used instead of the TSC value.
+-    // TODO: delete this WA when the KOS kernel is fixed.
+-#if !defined(__KOS__)
+ #if defined(__i386) || defined(__amd64) || defined(__aarch64__)
+     {
+         struct timespec start, stop;
+@@ -104,7 +98,6 @@ __global_calibrate_ticks(void)
+         }
+     }
+ #endif
+-#endif // __KOS__
+ }
+ 
+ /*
+-- 
+2.30.2
+
