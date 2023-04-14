@@ -97,6 +97,7 @@ U-Boot> bootelf 0x200000
       - *image* - additional files to place in the resulting image;
     - *CMakeLists.txt* - project-level CMake build rules;
     - *Makefile* - main Makefile to configure/build/run MongoDB project for KOS;
+  - *patches* - optional patches for MongoDB KOS;
 
 ## Known issues and limitations
 
