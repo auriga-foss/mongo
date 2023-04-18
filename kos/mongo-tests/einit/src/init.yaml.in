@@ -1,0 +1,16 @@
+entities:
+
+- name: test_runner.Testrunner
+  path: Testrunner
+  env:
+    VFS_FILESYSTEM_BACKEND: client:@ROOTFS_ENTITY@
+    VFS_NETWORK_BACKEND: client:kl.VfsNet
+  connections:
+  - target: @ROOTFS_ENTITY@
+    id: @ROOTFS_ENTITY@
+  - target: kl.VfsNet
+    id: kl.VfsNet
+@INIT_Testrunner_ENTITY_CONNECTIONS+@
+@INIT_Testrunner_ENTITY_ARGS@
+
+@INIT_EXTERNAL_ENTITIES@

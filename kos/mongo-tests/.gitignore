@@ -1,0 +1,7 @@
+# ignore KOS-related build directory
+build-aarch64/
+
+# do not ignore (cancel rule from ../.gitignore)
+!test_runner/
+!CMakeLists.txt
+
