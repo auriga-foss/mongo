@@ -39,7 +39,7 @@ Run `make help` to get a list of all available targets.
 
 ### QEMU image
 
-1. `cd <repo_root>/kos/src/`;
+1. `cd <repo_root>/kos/mongod/`;
 2. `make compile-mongod`;
 3. `make qemubuild`;
 4. `make qemurun`;
@@ -48,7 +48,7 @@ port (default 27018).
 
 ### HW (RaspberryPi) image
 
-1. `cd <repo_root>/kos/src/`;
+1. `cd <repo_root>/kos/mongod/`;
 2. `make compile-mongod`;
 3. `make hwbuild`;  
    Resulting image path: *<target_arch>/einit/kos-image*;

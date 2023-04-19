@@ -53,7 +53,7 @@ Run `make help` to get a list of all available targets.
 
 #### QEMU image
 
-1. `cd <repo_root>/kos/src/`;
+1. `cd <repo_root>/kos/mongod/`;
 2. `make compile-mongod`;
 3. `make qemubuild`;
 4. `make qemurun`;
@@ -62,7 +62,7 @@ port (default 27018).
 
 #### HW (RaspberryPi) image
 
-1. `cd <repo_root>/kos/src/`;
+1. `cd <repo_root>/kos/mongod/`;
 2. `make compile-mongod`;
 3. `make hwbuild`;  
    Resulting image path: *<target_arch>/einit/kos-image*;
@@ -88,7 +88,7 @@ U-Boot> bootelf 0x200000
     - *build-image.sh* - example command to create a Docker image;
     - *create-and-run-container.sh* - example command to create and run a
       Docker container from a previously created image;
-  - *src* - src code of KOS entities, rules for building an image;
+  - *mongod* - project to run **mongod** under KOS OS;
     - *einit*, *mongod* - sources and CMake build rules for corresponding
       entities;
     - *resources* - description files for all the entities, additional files to
