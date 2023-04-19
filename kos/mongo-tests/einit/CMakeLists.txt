@@ -28,13 +28,24 @@ set (RESOURCES_DIR ${CMAKE_SOURCE_DIR}/resources/image)
 set (IMAGE_DIR ${CMAKE_BINARY_DIR}/image)
 
 # SD card
+
+# Create target image dir and copy resources
 add_custom_target (${FS_IMAGE}
     COMMAND ${CMAKE_COMMAND} -E make_directory ${IMAGE_DIR}
     COMMAND ${CMAKE_COMMAND} -E make_directory ${IMAGE_DIR}/${MONGO_TEST_DIR}
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${RESOURCES_DIR} ${IMAGE_DIR}
-    COMMAND ${CMAKE_COMMAND} -E copy ${MONGO_BUILD_PATH}/install/bin/db_bson_test ${IMAGE_DIR}/${MONGO_TEST_DIR}
-    COMMAND ${CMAKE_COMMAND} -E copy ${MONGO_BUILD_PATH}/install/bin/db_sorter_test ${IMAGE_DIR}/${MONGO_TEST_DIR}
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${RESOURCES_DIR} ${IMAGE_DIR})
 
+# Copy configured test binaries
+foreach (test_name IN LISTS MONGO_TEST_BINARIES)
+    add_custom_command (TARGET ${FS_IMAGE} PRE_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy 
+            ${MONGO_BUILD_PATH}/install/bin/${test_name}
+            ${IMAGE_DIR}/${MONGO_TEST_DIR})
+endforeach ()
+
+# Create SD card image
+add_custom_command (TARGET ${FS_IMAGE}
+    POST_BUILD
     COMMAND  ${KL_SDK_ROOT_PATH}/common/prepare_hdd_img.sh
         -d   ${IMAGE_DIR}
         -s   ${FS_IMG_SIZE}

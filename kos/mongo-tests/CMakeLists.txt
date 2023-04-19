@@ -25,7 +25,7 @@ include_directories (${precompiled_vfs_INCLUDE})
 find_package (rump REQUIRED COMPONENTS DHCPCD_ENTITY)
 include_directories (${rump_INCLUDE})
 
-# Set directory where unit-test executables are located
+# Set directory where unit-test executables will be located
 set (MONGO_TEST_DIR "/tests")
 
 # Set unit-test executables to be run
