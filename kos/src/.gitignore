@@ -1,5 +1,5 @@
 # ignore KOS-related build directory
-build/
+build-*/
 
 # do not ignore (cancel rule from ../.gitignore)
 !mongod/
