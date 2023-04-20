@@ -21,7 +21,7 @@ set (FS_BACKEND ${precompiled_vfsVfsSdCardFs})
 set (FS_IMAGE sdcard0.img)
 set (FS_IMG_FORMAT fat32)
 set (FS_IMG_SIZE 100)
-set (QEMU_FLAGS "-m 2048 -drive file=${FS_IMAGE},if=sd,format=raw")
+set (QEMU_FLAGS "-drive file=${FS_IMAGE},if=sd,format=raw")
 
 
 set (RESOURCES_DIR ${CMAKE_SOURCE_DIR}/resources/image)
@@ -97,6 +97,7 @@ set_target_properties (${rump_DHCPCD_ENTITY} PROPERTIES
     - /etc/dhcpcd.conf")
 
 # Building Kaspersky OS solution image for a hardware platform.
+#TODO: need to prepare sd-card image and check it on RPi  
 build_kos_hw_image (kos-image
                     EINIT_ENTITY EinitHw
                     CONNECTIONS_CFG "src/init.yaml.in"

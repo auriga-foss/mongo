@@ -20,7 +20,4 @@ target_link_libraries (Testrunner ${${PROJECT_NAME}_LIBS} ${vfs_CLIENT_LIB})
 # Set test directory as argument 
 set_target_properties (Testrunner PROPERTIES EXTRA_ARGS "  - ${MONGO_TEST_DIR}")
 
-add_executable (Test IMPORTED GLOBAL)
-target_link_libraries (Test)
-
 add_dependencies (Testrunner test_runner_edl_files test_edl_files)

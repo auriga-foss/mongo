@@ -1,4 +1,3 @@
-SCRIPT_DIR="$(dirname "$(realpath "${0}")")"
 BUILD_ROOT = $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 BUILD = $(BUILD_ROOT)/build-$(TARGET_ARCH)
 MONGO_SRC = $(abspath $(BUILD_ROOT)/../../)
@@ -26,13 +25,14 @@ export CXX := ${TARGET_ARCH}-${TARGET_OS}-g++
 export LANG = C
 export TOOLCHAIN_SUFFIX ?= ""
 
-# localhost port to be forwarded to QEMU guest
 export MONGO_BUILD_PATH ?= $(MONGO_SRC)/build/kos
 
 
 ifeq ($(strip $(TARGET_ARCH)),aarch64)
 QEMU_OPTS = -m 2048 -machine vexpress-a15,secure=on -cpu cortex-a72 \
 			-nographic -monitor none -smp 4 -serial stdio
+#TODO: information about sd-card image must be available both to make and CMake 
+QEMU_OPTS += -drive file=$(BUILD)/einit/sdcard0.img,if=sd,format=raw
 else
 $(error Bad target architecture: $(TARGET_ARCH). \
         No architectures other than aarch64 are currently supported)
@@ -77,38 +77,38 @@ compile-mongo-tests:
 
 help:
 	@echo "The following targets are defined by this Makefile:"
-	@echo "    help:             	prints this message;"
-	@echo "    dump-vars:        	dump Makefile variables;"
-	@echo "    compile-mongo-tests:	compile and install mongo unittests;"
-	@echo "    prebuild:         	generate build files (Makefiles) from"
-	@echo "                      	CMakeLists.txt scenario;"
-	@echo "    qemubuild:        	build KOS image to run on QEMU;"
-	@echo "    hwbuild:          	build KOS image to run on RaspberryPi;"
-	@echo "    qemurun:          	run using QEMU"
-	@echo "                      	(options are specified in QEMU_OPTS 
-	@echo "                      	variable);"
-	@echo "    qemurun/gdb:      	run using QEMU. QEMU will be run with a GDB"
-	@echo "                      	server listening on tcp::QEMU_GDB_PORT"
-	@echo "                      	(GDB options are specified in QEMU_GDB_OPTS"
-	@echo "                      	variable);"
-	@echo "    run/gdb:          	run GDB, connect to server, add symbol file;"
-	@echo "    clean:            	aux. target (currently equal to clean-kos);"
-	@echo "    clean-kos:        	remove KOS build directory;"
-	@echo "    clean-mongo:      	remove MongoDB build directory;"
-	@echo "    clean-all:        	remove KOS & MongoDB build directories;"
+	@echo "    help:                prints this message;"
+	@echo "    dump-vars:           dump Makefile variables;"
+	@echo "    compile-mongo-tests: compile and install mongo unittests;"
+	@echo "    prebuild:            generate build files (Makefiles) from"
+	@echo "                         CMakeLists.txt scenario;"
+	@echo "    qemubuild:           build KOS image to run on QEMU;"
+	@echo "    hwbuild:             build KOS image to run on RaspberryPi;"
+	@echo "    qemurun:             run using QEMU"
+	@echo "                         (options are specified in QEMU_OPTS "
+	@echo "                         variable);"
+	@echo "    qemurun/gdb:         run using QEMU. QEMU will be run with a GDB"
+	@echo "                         server listening on tcp::QEMU_GDB_PORT"
+	@echo "                         (GDB options are specified in QEMU_GDB_OPTS"
+	@echo "                         variable);"
+	@echo "    run/gdb:             run GDB, connect to server, add symbol file;"
+	@echo "    clean:               aux. target (currently equal to clean-kos);"
+	@echo "    clean-kos:           remove KOS build directory;"
+	@echo "    clean-mongo:         remove MongoDB build directory;"
+	@echo "    clean-all:           remove KOS & MongoDB build directories;"
 	@echo ""
 	@echo "The following targets are wrappers for those predefined by the KOS:"
-	@echo "    sim:              rebuild image and run using QEMU;"
-	@echo "    sim/fast:         'fast' version of the sim target. Does the"
-	@echo "                      same, except it DOESN'T rebuild an image;"
-	@echo "    gdbsim:           rebuild image, run using QEMU. QEMU will be"
-	@echo "                      run with a running GDB server waiting for a"
-	@echo "                      connection on tcp::1234;"
-	@echo "    gdbsim/fast:      'fast' version of the gdbsim target. Does the"
-	@echo "                      same, except it DOESN'T rebuild an image;"
-	@echo "    gdb:              rebuild image and run GDB for target arch;"
-	@echo "    gdb/fast:         'fast' version of the gdb target. Does the"
-	@echo "                      same, except it DOESN'T rebuild an image;"
+	@echo "    sim:                 rebuild image and run using QEMU;"
+	@echo "    sim/fast:            'fast' version of the sim target. Does the"
+	@echo "                         same, except it DOESN'T rebuild an image;"
+	@echo "    gdbsim:              rebuild image, run using QEMU. QEMU will be"
+	@echo "                         run with a running GDB server waiting for a"
+	@echo "                         connection on tcp::1234;"
+	@echo "    gdbsim/fast:         'fast' version of the gdbsim target. Does the"
+	@echo "                         same, except it DOESN'T rebuild an image;"
+	@echo "    gdb:                 rebuild image and run GDB for target arch;"
+	@echo "    gdb/fast:            'fast' version of the gdb target. Does the"
+	@echo "                         same, except it DOESN'T rebuild an image;"
 
 
 dump-vars:
@@ -124,13 +124,12 @@ dump-vars:
 	@echo "    MONGO_BUILD_PATH = $(MONGO_BUILD_PATH)"
 
 .PHONY: prebuild qemubuild hwbuild
-prebuild: $(MONGO_BUILD_PATH)/install/bin/mongod.nodebug
+prebuild:
 	$(SDK_PREFIX)/toolchain/bin/cmake -G "Unix Makefiles" \
 		-B $(BUILD) \
 		-D CMAKE_BUILD_TYPE:STRING=Debug \
 		-D CMAKE_INSTALL_PREFIX:STRING="$(INSTALL_PREFIX)" \
 		-D CMAKE_FIND_ROOT_PATH="$([[ -f "$(SCRIPT_DIR)/additional_cmake_find_root.txt" ]] && cat "$(SCRIPT_DIR)/additional_cmake_find_root.txt")$(PREFIX_DIR)/sysroot-$(TARGET)" \
-		-D CMAKE_TOOLCHAIN_FILE="$(SDK_PREFIX)/toolchain/share/toolchain-$(TARGET)$(TOOLCHAIN_SUFFIX).cmake" \
 		-D MONGO_BUILD_PATH=$(MONGO_BUILD_PATH) \
 		$(BUILD_ROOT)/
 
@@ -151,7 +150,6 @@ qemurun/gdb:
 
 run/gdb:
 	$(TARGET)-gdb -ex "target remote 127.0.0.1:$(QEMU_GDB_PORT)" \
-		--symbols=$(MONGO_BUILD_PATH)/install/bin/mongod
 
 # Note: These targets are wrappers for those predefined by the KOS build system
 WRAPPER_TARGETS = sim sim/fast gdbsim gdbsim/fast gdb gdb/fast
