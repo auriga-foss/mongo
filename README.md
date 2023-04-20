@@ -97,6 +97,15 @@ U-Boot> bootelf 0x200000
       - *image* - additional files to place in the resulting image;
     - *CMakeLists.txt* - project-level CMake build rules;
     - *Makefile* - main Makefile to configure/build/run MongoDB project for KOS;
+  - *mongo-tests* - project to run **mongod unit-tests** under KOS OS;
+    - *einit*, *test_runner* - sources and CMake build rules for corresponding
+      entities;
+    - *resources* - description files for all the entities, additional files to
+      place in the resulting image;
+      - *edl* - entities *.edl description files;
+      - *image* - additional files to place in the resulting image;
+    - *CMakeLists.txt* - project-level CMake build rules;
+    - *Makefile* - main Makefile to configure/build/run mongod unit-tests for KOS;
   - *patches* - optional patches for MongoDB KOS;
 
 ## Known issues and limitations
