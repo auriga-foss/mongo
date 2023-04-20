@@ -399,7 +399,8 @@ void reportOutOfMemoryErrorAndExit() {
 }
 
 void clearSignalMask() {
-#ifndef _WIN32
+// Note: KOS CE SDK has not implemented sigprocmask() (stub);
+#if !defined(_WIN32) && !defined(__KOS__)
     // We need to make sure that all signals are unmasked so signals are handled correctly
     sigset_t unblockSignalMask;
     invariant(sigemptyset(&unblockSignalMask) == 0);
