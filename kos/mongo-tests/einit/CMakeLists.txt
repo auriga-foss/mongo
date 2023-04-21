@@ -18,39 +18,6 @@ set (SECURITY_PSL_FILE "src/security.psl.in")
 set (ROOTFS_ENTITY "kl.VfsSdCardFs")
 set (ROOTFS_DEVICE "sdcard")
 set (FS_BACKEND ${precompiled_vfsVfsSdCardFs})
-set (FS_IMAGE sdcard0.img)
-set (FS_IMG_FORMAT fat32)
-set (FS_IMG_SIZE 100)
-set (QEMU_FLAGS "-drive file=${FS_IMAGE},if=sd,format=raw")
-
-
-set (RESOURCES_DIR ${CMAKE_SOURCE_DIR}/resources/image)
-set (IMAGE_DIR ${CMAKE_BINARY_DIR}/image)
-
-# SD card
-
-# Create target image dir and copy resources
-add_custom_target (${FS_IMAGE}
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${IMAGE_DIR}
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${IMAGE_DIR}/${MONGO_TEST_DIR}
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${RESOURCES_DIR} ${IMAGE_DIR})
-
-# Copy configured test binaries
-foreach (test_name IN LISTS MONGO_TEST_BINARIES)
-    add_custom_command (TARGET ${FS_IMAGE} PRE_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy 
-            ${MONGO_BUILD_PATH}/install/bin/${test_name}
-            ${IMAGE_DIR}/${MONGO_TEST_DIR})
-endforeach ()
-
-# Create SD card image
-add_custom_command (TARGET ${FS_IMAGE}
-    POST_BUILD
-    COMMAND  ${KL_SDK_ROOT_PATH}/common/prepare_hdd_img.sh
-        -d   ${IMAGE_DIR}
-        -s   ${FS_IMG_SIZE}
-        -f   ${FS_IMG_FORMAT}
-        -img ${FS_IMAGE})
 
 list (APPEND ENTITIES ${FS_BACKEND})
 set_target_properties(${FS_BACKEND} PROPERTIES
@@ -113,5 +80,3 @@ build_kos_qemu_image (kos-qemu-image
                       QEMU_FLAGS "${QEMU_FLAGS}"
                       IMAGE_FILES ${ENTITIES}
                                   ${FILES})
-
-add_dependencies (kos-qemu-image ${FS_IMAGE})

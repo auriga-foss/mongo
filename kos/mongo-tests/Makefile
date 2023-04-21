@@ -27,12 +27,46 @@ export TOOLCHAIN_SUFFIX ?= ""
 
 export MONGO_BUILD_PATH ?= $(MONGO_SRC)/build/kos
 
+IMG_PATH = $(BUILD)/sdcard
+IMG_NAME = $(BUILD)/sdcard0.img
+IMG_FORMAT = fat32
+
+CHOSEN_TESTS =  db_bson_test \
+				db_sorter_test \
+				db_fts_test
+
+TEST_SRC_DIR = $(MONGO_BUILD_PATH)/install/bin
+TEST_DST_DIR = $(IMG_PATH)/tests
+
+TESTS = $(CHOSEN_TESTS)
+
+TESTS_SRC = $(foreach test, $(TESTS), $(TEST_SRC_DIR)/$(test))
+TESTS_DST = $(foreach test, $(TESTS), $(TEST_DST_DIR)/$(test))
+
+# Create image folder
+$(TEST_DST_DIR):
+	mkdir -p $(TEST_DST_DIR)
+
+# Strip unit-test binaries to reduce their size and copy them to image folder
+$(TEST_DST_DIR)/%_test : $(TEST_SRC_DIR)/%_test | $(TEST_DST_DIR)
+	$(TARGET)-strip -s -o $@ $<
+
+# Copy resources/image
+$(IMG_PATH)/etc:
+	cp -r $(BUILD_ROOT)/resources/image/* $(IMG_PATH)
+
+$(IMG_NAME): $(TESTS_DST) $(IMG_PATH)/etc
+	$(SDK_PREFIX)/common/prepare_hdd_img.sh \
+        -d   $(IMG_PATH) \
+        -s   $(firstword $(shell du -s -B 1MB $(IMG_PATH))) \
+        -f   $(IMG_FORMAT) \
+        -img $(IMG_NAME)
 
 ifeq ($(strip $(TARGET_ARCH)),aarch64)
 QEMU_OPTS = -m 2048 -machine vexpress-a15,secure=on -cpu cortex-a72 \
 			-nographic -monitor none -smp 4 -serial stdio
-#TODO: information about sd-card image must be available both to make and CMake 
-QEMU_OPTS += -drive file=$(BUILD)/einit/sdcard0.img,if=sd,format=raw
+QEMU_IMAGE_OPT = -drive file=$(IMG_NAME),if=sd,format=raw
+QEMU_OPTS += $(QEMU_IMAGE_OPT)
 else
 $(error Bad target architecture: $(TARGET_ARCH). \
         No architectures other than aarch64 are currently supported)
@@ -121,16 +155,16 @@ dump-vars:
 	@echo "    PATH = $(PATH)"
 	@echo "    TARGET = $(TARGET)"
 	@echo "    MONGO_SRC = $(MONGO_SRC)"
-	@echo "    MONGO_BUILD_PATH = $(MONGO_BUILD_PATH)"
+	@echo "    QEMU_IMAGE_OPT = $(QEMU_IMAGE_OPT)"
 
 .PHONY: prebuild qemubuild hwbuild
-prebuild:
+prebuild: $(IMG_NAME)
 	$(SDK_PREFIX)/toolchain/bin/cmake -G "Unix Makefiles" \
 		-B $(BUILD) \
 		-D CMAKE_BUILD_TYPE:STRING=Debug \
 		-D CMAKE_INSTALL_PREFIX:STRING="$(INSTALL_PREFIX)" \
 		-D CMAKE_TOOLCHAIN_FILE="$(SDK_PREFIX)/toolchain/share/toolchain-$(TARGET)$(TOOLCHAIN_SUFFIX).cmake" \
-		-D MONGO_BUILD_PATH=$(MONGO_BUILD_PATH) \
+		-D QEMU_FLAGS="$(QEMU_IMAGE_OPT)" \
 		$(BUILD_ROOT)/
 
 qemubuild: prebuild
