@@ -26,12 +26,12 @@ find_package (rump REQUIRED COMPONENTS DHCPCD_ENTITY)
 include_directories (${rump_INCLUDE})
 
 # Set directory where unit-test executables will be located
-set (MONGO_TEST_DIR "/tests")
+set (MONGO_TEST_DIR ${TEST_DIR})
 
-# Set unit-test executables to be run
-set (MONGO_TEST_BINARIES 
-        "db_bson_test"
-        "db_sorter_test")
+# Set unit-test executables to be run for none-empty var
+if(NOT "${CHOSEN_TESTS}" STREQUAL "")
+    string(REPLACE " " ";" MONGO_TEST_BINARIES ${CHOSEN_TESTS})
+endif()
 
 add_subdirectory (test_runner)
 add_subdirectory (einit)

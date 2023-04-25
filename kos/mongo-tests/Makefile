@@ -31,30 +31,37 @@ IMG_PATH = $(BUILD)/sdcard
 IMG_NAME = $(BUILD)/sdcard0.img
 IMG_FORMAT = fat32
 
-CHOSEN_TESTS =  db_bson_test \
-				db_sorter_test \
-				db_fts_test
-
+TEST_DIR = /tests
 TEST_SRC_DIR = $(MONGO_BUILD_PATH)/install/bin
-TEST_DST_DIR = $(IMG_PATH)/tests
+TEST_DST_DIR = $(IMG_PATH)$(TEST_DIR)
 
-TESTS = $(CHOSEN_TESTS)
+TESTS_SRC = $(notdir $(wildcard $(TEST_SRC_DIR)/*_test))
+TESTS_DST = $(foreach test, $(TESTS_SRC), $(TEST_DST_DIR)/$(test))
 
-TESTS_SRC = $(foreach test, $(TESTS), $(TEST_SRC_DIR)/$(test))
-TESTS_DST = $(foreach test, $(TESTS), $(TEST_DST_DIR)/$(test))
+# CHOSEN_TESTS variable contains list of unit-tests to be run on KOS platform
+# Notes:
+# 1) SD card image contains all available Mongo unit-tests
+# 2) Empty CHOSEN_TESTS causes running of all unit-tests 
+CHOSEN_TESTS = db_bson_test \
+               db_sorter_test
 
 # Create image folder
 $(TEST_DST_DIR):
 	mkdir -p $(TEST_DST_DIR)
+
+# Create build folder
+$(BUILD):
+	mkdir -p $(BUILD)
 
 # Strip unit-test binaries to reduce their size and copy them to image folder
 $(TEST_DST_DIR)/%_test : $(TEST_SRC_DIR)/%_test | $(TEST_DST_DIR)
 	$(TARGET)-strip -s -o $@ $<
 
 # Copy resources/image
-$(IMG_PATH)/etc:
+$(IMG_PATH)/etc: $(BUILD)
 	cp -r $(BUILD_ROOT)/resources/image/* $(IMG_PATH)
 
+# Create SD card image
 $(IMG_NAME): $(TESTS_DST) $(IMG_PATH)/etc
 	$(SDK_PREFIX)/common/prepare_hdd_img.sh \
         -d   $(IMG_PATH) \
@@ -87,9 +94,6 @@ MARCH=armv8-a
 
 # TODO:
 # 1) Switch the build to dynamic linking when supported by the KOS CE SDK;
-# 2) Enable support for HTTP client & Free Monitoring when libcurl is available
-#    in the KOS CE SDK;
-# 3) Enable mozjs JS engine;
 .PHONY:  compile-mongo-tests
 compile-mongo-tests:
 	cd $(MONGO_SRC) && python3 buildscripts/scons.py \
@@ -156,6 +160,8 @@ dump-vars:
 	@echo "    TARGET = $(TARGET)"
 	@echo "    MONGO_SRC = $(MONGO_SRC)"
 	@echo "    QEMU_IMAGE_OPT = $(QEMU_IMAGE_OPT)"
+	@echo "    TEST_DIR = $(TEST_DIR)"
+	@echo "    CHOSEN_TESTS = $(CHOSEN_TESTS)"
 
 .PHONY: prebuild qemubuild hwbuild
 prebuild: $(IMG_NAME)
@@ -165,6 +171,8 @@ prebuild: $(IMG_NAME)
 		-D CMAKE_INSTALL_PREFIX:STRING="$(INSTALL_PREFIX)" \
 		-D CMAKE_TOOLCHAIN_FILE="$(SDK_PREFIX)/toolchain/share/toolchain-$(TARGET)$(TOOLCHAIN_SUFFIX).cmake" \
 		-D QEMU_FLAGS="$(QEMU_IMAGE_OPT)" \
+		-D TEST_DIR="$(TEST_DIR)" \
+		-D CHOSEN_TESTS="$(CHOSEN_TESTS)" \
 		$(BUILD_ROOT)/
 
 qemubuild: prebuild

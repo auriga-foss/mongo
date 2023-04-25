@@ -163,16 +163,15 @@ testRun(const EntityInfo *einfo, const char *path)
     return rc;
 }
 
+
 /* 
  *   Arguments:
- *      (1) Path to directory where test executables are located
+ *      (1) Path to directory where unit-test executables are located
+ *      (2) - (n) Name(s) of the unit-test executable to be run
  */
-
 int
 main(int argc, const char *argv[])
 {
-    DIR *dirp;
-    struct dirent *dp;
     static const EntityInfo test_einfo = { "test_runner.Test", 0, RTL_NULL };
 
     if (argc < 2) {
@@ -188,19 +187,55 @@ main(int argc, const char *argv[])
         return EXIT_FAILURE;
     }
 
-    dirp = opendir(".");
-    if (dirp == NULL) {
-        rtl_printf("Cannot open test directory to %s: "
-                    "Error \"%s\"\n", argv[1], strerror(errno));
-        return EXIT_FAILURE;
-    }
-    
-    while ((dp = readdir(dirp)) != NULL) {
-        if (dp->d_type == DT_REG) {
-            testRun(&test_einfo, dp->d_name);
+    rtl_printf("\nTest list to be executed:\n");
+
+    if (argc == 2) { // Run all tests located in test dir
+
+        struct dirent **namelist;
+        int n = scandir(".", &namelist, NULL, alphasort);
+
+        if (n < 0) {
+            rtl_printf("Cannot open test directory to %s: "
+                        "Error \"%s\"\n", argv[1], strerror(errno));
+            return EXIT_FAILURE;
+        }
+
+        // Print all test names
+        for (int i = 0; i < n; i++) {
+            if (namelist[i]->d_type == DT_REG) {
+                rtl_printf(ANSI_COLOR_BLUE"%s"ANSI_COLOR_RESET"\n",
+                            namelist[i]->d_name);
+            }
+        }
+        rtl_printf("\n");
+
+        // Run all tests
+        for (int i = 0; i < n; i++) {
+            if (namelist[i]->d_type == DT_REG) {
+                testRun(&test_einfo, namelist[i]->d_name);
+            }
+        }
+
+        // Free memory allocated by scandir()
+        for (int i = 0; i < n; i++) {
+            free(namelist[i]);
+        }
+        free(namelist);
+
+    } else { // Run selected tests provided as arguments
+
+        // Print all test names
+        for (int i = 2; i < argc; i++) {
+            rtl_printf(ANSI_COLOR_BLUE"%s"ANSI_COLOR_RESET"\n",
+                        argv[i]);
+        }
+        rtl_printf("\n");
+
+        // Run all tests
+        for (int i = 2; i < argc; i++) {
+            testRun(&test_einfo, argv[i]);
         }
     }
 
-    closedir(dirp);
     return EXIT_SUCCESS;
 }

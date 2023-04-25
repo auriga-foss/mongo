@@ -10,7 +10,6 @@ entities:
     id: @ROOTFS_ENTITY@
   - target: kl.VfsNet
     id: kl.VfsNet
-@INIT_Testrunner_ENTITY_CONNECTIONS+@
 @INIT_Testrunner_ENTITY_ARGS@
 
 @INIT_EXTERNAL_ENTITIES@

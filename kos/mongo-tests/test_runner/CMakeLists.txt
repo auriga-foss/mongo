@@ -18,6 +18,13 @@ add_executable (Testrunner "src/test_runner.c" )
 target_link_libraries (Testrunner ${${PROJECT_NAME}_LIBS} ${vfs_CLIENT_LIB})
 
 # Set test directory as argument 
-set_target_properties (Testrunner PROPERTIES EXTRA_ARGS "  - ${MONGO_TEST_DIR}")
+set(_EXTRA_ARGS "   - ${MONGO_TEST_DIR}\n")
+
+# List test names as arguments
+foreach (test_name IN LISTS MONGO_TEST_BINARIES)
+    string(APPEND _EXTRA_ARGS "   - ${test_name}\n")
+endforeach ()
+
+set_target_properties (Testrunner PROPERTIES EXTRA_ARGS ${_EXTRA_ARGS})
 
 add_dependencies (Testrunner test_runner_edl_files test_edl_files)
