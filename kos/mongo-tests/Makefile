@@ -27,23 +27,23 @@ export TOOLCHAIN_SUFFIX ?= ""
 
 export MONGO_BUILD_PATH ?= $(MONGO_SRC)/build/kos
 
-IMG_PATH = $(BUILD)/sdcard
-IMG_NAME = $(BUILD)/sdcard0.img
+IMG_DIR = $(BUILD)/sdcard
+IMG_NAME = sdcard0.img
+IMG = $(BUILD)/$(IMG_NAME)
 IMG_FORMAT = fat32
 
-TEST_DIR = /tests
+IMG_TEST_DIR = /tests
 TEST_SRC_DIR = $(MONGO_BUILD_PATH)/install/bin
-TEST_DST_DIR = $(IMG_PATH)$(TEST_DIR)
+TEST_DST_DIR = $(IMG_DIR)/$(IMG_TEST_DIR)
 
-TESTS_SRC = $(notdir $(wildcard $(TEST_SRC_DIR)/*_test))
-TESTS_DST = $(foreach test, $(TESTS_SRC), $(TEST_DST_DIR)/$(test))
+TESTS = $(patsubst $(TEST_SRC_DIR)%, $(TEST_DST_DIR)%, $(wildcard $(TEST_SRC_DIR)/*_test))
 
 # CHOSEN_TESTS variable contains list of unit-tests to be run on KOS platform
 # Notes:
 # 1) SD card image contains all available Mongo unit-tests
 # 2) Empty CHOSEN_TESTS causes running of all unit-tests 
-CHOSEN_TESTS = db_bson_test \
-               db_sorter_test
+CHOSEN_TESTS ?= db_bson_test \
+               	db_sorter_test
 
 # Create image folder
 $(TEST_DST_DIR):
@@ -58,21 +58,21 @@ $(TEST_DST_DIR)/%_test : $(TEST_SRC_DIR)/%_test | $(TEST_DST_DIR)
 	$(TARGET)-strip -s -o $@ $<
 
 # Copy resources/image
-$(IMG_PATH)/etc: $(BUILD)
-	cp -r $(BUILD_ROOT)/resources/image/* $(IMG_PATH)
+$(IMG_DIR)/etc: $(BUILD)
+	cp -r $(BUILD_ROOT)/resources/image/* $(IMG_DIR)
 
 # Create SD card image
-$(IMG_NAME): $(TESTS_DST) $(IMG_PATH)/etc
+$(IMG): $(TESTS) $(IMG_DIR)/etc
 	$(SDK_PREFIX)/common/prepare_hdd_img.sh \
-        -d   $(IMG_PATH) \
-        -s   $(firstword $(shell du -s -B 1MB $(IMG_PATH))) \
+        -d   $(IMG_DIR) \
+        -s   $(firstword $(shell du -s -B 1MB $(IMG_DIR))) \
         -f   $(IMG_FORMAT) \
-        -img $(IMG_NAME)
+        -img $(IMG)
 
 ifeq ($(strip $(TARGET_ARCH)),aarch64)
 QEMU_OPTS = -m 2048 -machine vexpress-a15,secure=on -cpu cortex-a72 \
 			-nographic -monitor none -smp 4 -serial stdio
-QEMU_IMAGE_OPT = -drive file=$(IMG_NAME),if=sd,format=raw
+QEMU_IMAGE_OPT = -drive file=$(IMG),if=sd,format=raw
 QEMU_OPTS += $(QEMU_IMAGE_OPT)
 else
 $(error Bad target architecture: $(TARGET_ARCH). \
@@ -160,18 +160,18 @@ dump-vars:
 	@echo "    TARGET = $(TARGET)"
 	@echo "    MONGO_SRC = $(MONGO_SRC)"
 	@echo "    QEMU_IMAGE_OPT = $(QEMU_IMAGE_OPT)"
-	@echo "    TEST_DIR = $(TEST_DIR)"
+	@echo "    IMG_TEST_DIR = $(IMG_TEST_DIR)"
 	@echo "    CHOSEN_TESTS = $(CHOSEN_TESTS)"
 
 .PHONY: prebuild qemubuild hwbuild
-prebuild: $(IMG_NAME)
+prebuild: $(IMG)
 	$(SDK_PREFIX)/toolchain/bin/cmake -G "Unix Makefiles" \
 		-B $(BUILD) \
 		-D CMAKE_BUILD_TYPE:STRING=Debug \
 		-D CMAKE_INSTALL_PREFIX:STRING="$(INSTALL_PREFIX)" \
 		-D CMAKE_TOOLCHAIN_FILE="$(SDK_PREFIX)/toolchain/share/toolchain-$(TARGET)$(TOOLCHAIN_SUFFIX).cmake" \
 		-D QEMU_FLAGS="$(QEMU_IMAGE_OPT)" \
-		-D TEST_DIR="$(TEST_DIR)" \
+		-D IMG_TEST_DIR="$(IMG_TEST_DIR)" \
 		-D CHOSEN_TESTS="$(CHOSEN_TESTS)" \
 		$(BUILD_ROOT)/
 

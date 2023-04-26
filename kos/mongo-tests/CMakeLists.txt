@@ -22,11 +22,12 @@ find_package (precompiled_vfs REQUIRED)
 include_directories (${precompiled_vfs_INCLUDE})
 
 # Attach a package with the dhcpcd entity implementation.
+# TODO: Need to check if Mongo unit-tests use networking and remove it, if not
 find_package (rump REQUIRED COMPONENTS DHCPCD_ENTITY)
 include_directories (${rump_INCLUDE})
 
 # Set directory where unit-test executables will be located
-set (MONGO_TEST_DIR ${TEST_DIR})
+set (MONGO_TEST_DIR ${IMG_TEST_DIR})
 
 # Set unit-test executables to be run for none-empty var
 if(NOT "${CHOSEN_TESTS}" STREQUAL "")
