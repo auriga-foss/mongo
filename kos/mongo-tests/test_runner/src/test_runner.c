@@ -164,6 +164,13 @@ testRun(const EntityInfo *einfo, const char *path)
 }
 
 
+static int 
+regular_files_only(const struct dirent *entry)
+{
+    return (entry->d_type == DT_REG) ? 1 : 0;
+}
+
+
 /* 
  *   Arguments:
  *      (1) Path to directory where unit-test executables are located
@@ -175,9 +182,13 @@ main(int argc, const char *argv[])
     static const EntityInfo test_einfo = { "test_runner.Test", 0, RTL_NULL };
 
     if (argc < 2) {
-        rtl_printf("Wrong %s usage. "
-                    "Path to folder with executables "
-                    "must be provided as an argument\n", argv[0]);
+        rtl_printf("Error: No parameters are specified.\n\n"
+                    "Usage:\n\n"
+                    "%s <test_dir> [testname]...\n\n"
+                    "If one or more <testname> are set,"
+                    " only those tests will be run. Otherwise"
+                    ", all tests located in <test_dir> will be run\n\n"
+                    , argv[0]);
         return EXIT_FAILURE;
     }
 
@@ -192,7 +203,7 @@ main(int argc, const char *argv[])
     if (argc == 2) { // Run all tests located in test dir
 
         struct dirent **namelist;
-        int n = scandir(".", &namelist, NULL, alphasort);
+        int n = scandir(".", &namelist, regular_files_only, alphasort);
 
         if (n < 0) {
             rtl_printf("Cannot open test directory to %s: "
@@ -202,18 +213,14 @@ main(int argc, const char *argv[])
 
         // Print all test names
         for (int i = 0; i < n; i++) {
-            if (namelist[i]->d_type == DT_REG) {
-                rtl_printf(ANSI_COLOR_BLUE"%s"ANSI_COLOR_RESET"\n",
-                            namelist[i]->d_name);
-            }
+            rtl_printf(ANSI_COLOR_BLUE"%s"ANSI_COLOR_RESET"\n",
+                        namelist[i]->d_name);
         }
         rtl_printf("\n");
 
         // Run all tests
         for (int i = 0; i < n; i++) {
-            if (namelist[i]->d_type == DT_REG) {
-                testRun(&test_einfo, namelist[i]->d_name);
-            }
+            testRun(&test_einfo, namelist[i]->d_name);
         }
 
         // Free memory allocated by scandir()
