@@ -122,7 +122,42 @@ supported by KOS);
 
 ## How to run tests
 
-WIP...
+To run mongod unit-tests, there is a special **mongod unit-tests** project,
+located in *kos/mongo-tests* directory. In result of building process, all
+unit-test executables will be placed on the SD Card image. To limit the number
+of running unit-tests, `CHOSEN_TESTS` variable must be populated with the list
+of desired unit-tests (empty variable will cause running of all unit-tests). 
+To obtain the list of all available unit-tests, `make list-tests` must be
+executed.
+
+### QEMU image
+
+1. `cd <repo_root>/kos/mongo-tests/`;
+2. `make compile-mongo-tests`;
+3. `CHOSEN_TESTS = "<list of desired tests>" make qemubuild`;
+4. `make qemurun`.
+
+### HW (RaspberryPi) image
+
+1. `cd <repo_root>/kos/mongo-tests/`;
+2. `make compile-mongo-tests`;
+3. `CHOSEN_TESTS = "<list of desired tests>" make hwbuild`;
+4. Prepare SD Card:
+    1. Insert SD Сard and run the command below to format it with two partitions
+(1st partition for u-boot loader and the 2nd for tests and supporting
+files):  
+`dd if=<repo_root>/kos/mongo-tests/build-aarch64/sdcard0.img of=/dev/mmcblk<num> status=progress`
+    2. [Install u-boot to the 1st partition][6];
+    3. Copy `kos-image` to the any partition of SD Card:  
+    `cp <repo_root>/kos/mongo-tests/build-aarch64/einit/kos-image <path_to_sd_partition>`
+5. Turn on your Raspberry Pi. Communication is implemented via UART;
+6. Using a COM terminal (minicom or otherwise), run the following command after
+starting u-boot (assuming that your `num` partition is formatted to fat32):
+```
+U-Boot> fatload mmc 0:<partition_num> 0x200000 kos-image
+...
+U-Boot> bootelf 0x200000
+```
 
 ## Changed third-party components
 
