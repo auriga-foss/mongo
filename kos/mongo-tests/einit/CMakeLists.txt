@@ -21,6 +21,9 @@ set (FS_BACKEND ${precompiled_vfsVfsSdCardFs})
 
 list (APPEND ENTITIES ${FS_BACKEND})
 set_target_properties(${FS_BACKEND} PROPERTIES
+    EXTRA_ENV "\
+    ROOTFS: mmc0,1 / fat32 0
+    VFS_FILESYSTEM_BACKEND: server:kl.VfsSdCardFs"
     EXTRA_ARGS "\
     - -l
     - nodev /tmp ramfs 0
