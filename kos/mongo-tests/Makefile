@@ -119,7 +119,7 @@ compile-mongo-tests:
 		install-unittests -j${NPROC}
 
 
-.PHONY: help dump-vars
+.PHONY: help dump-vars list-tests
 
 help:
 	@echo "The following targets are defined by this Makefile:"
@@ -170,6 +170,9 @@ dump-vars:
 	@echo "    QEMU_IMAGE_OPT = $(QEMU_IMAGE_OPT)"
 	@echo "    IMG_TEST_DIR = $(IMG_TEST_DIR)"
 	@echo "    CHOSEN_TESTS = $(CHOSEN_TESTS)"
+
+list-tests:
+	@$(foreach name, $(sort $(notdir $(TESTS))), echo $(name);)
 
 .PHONY: prebuild qemubuild hwbuild
 prebuild: $(IMG)
