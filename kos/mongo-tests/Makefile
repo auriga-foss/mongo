@@ -62,7 +62,7 @@ $(IMG_DIR)/etc: $(BUILD)
 	cp -r $(BUILD_ROOT)/resources/image/* $(IMG_DIR)
 
 # Create SD card image
-BOOT_PART_SZ = 200
+BOOT_PART_SZ ?= 200
 TEST_PART_SZ = $(firstword $(shell du -s -B 1MB $(IMG_DIR)))
 IMG_SZ = $$(( $(BOOT_PART_SZ) + $(TEST_PART_SZ) + 10 ))
 BOOT_FRACTION = $$(( ($(BOOT_PART_SZ) * 100) / $(IMG_SZ) ))
@@ -73,7 +73,7 @@ $(IMG): $(TESTS) $(IMG_DIR)/etc
         -s   $(IMG_SZ) -%1 $(BOOT_FRACTION) -%2 $(TEST_FRACTION) \
         -f1   $(IMG_FORMAT) \
         -f2   $(IMG_FORMAT) \
-        -p1  /dev/null \
+        -p1  /dev/zero \
         -p2  $(IMG_DIR) \
         -img $(IMG)
 
